@@ -40,7 +40,7 @@ ModbusRTUSlave modbus(MODBUS_SERIAL, dePin);
 const uint8_t numCoils = 8;
 const uint8_t numDiscreteInputs = 8;
 const uint8_t numHoldingRegisters = 2;
-const uint8_t numInputRegisters = 2;
+const uint8_t numInputRegisters = 8;
 bool coils[numCoils];
 bool discreteInputs[numDiscreteInputs];
 uint16_t holdingRegisters[numHoldingRegisters];
@@ -56,14 +56,15 @@ void ModbusInit(){
 }
   
 void ModbusUpdate(){
-  gpio.coilsUpdate(coils,numCoils);
-  gpio.discreteInputsUpdate(discreteInputs,numDiscreteInputs);
+  gpio.WirteCoils(coils,numCoils);
+  gpio.ReadDiscreteInputs(discreteInputs,numDiscreteInputs);
   gpio.SetDisplay((int)holdingRegisters[0]);
 }
 
 void setup() {
   ModbusInit();
   DN23E08Init();
+  gpio.OffDisplay();
 }
 
 void loop(){

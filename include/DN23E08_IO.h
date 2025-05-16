@@ -171,7 +171,7 @@ DN23E08_IO(int latch595Pin, int clock595Pin, int data595Pin, int OE595Pin,int lo
     return (Read165INP_byte_pre & (1 << pin));
   } 
 
-  void coilsUpdate(bool* coils, size_t length){
+  void WirteCoils(bool* coils, size_t length){
     cli();            // Disable interrupts to enter critical section
      relay_port=0;
     for (size_t i = 0; i < length; i++) {
@@ -180,7 +180,7 @@ DN23E08_IO(int latch595Pin, int clock595Pin, int data595Pin, int OE595Pin,int lo
     sei();           // Re-enable interrupts
   }
 
-  void discreteInputsUpdate(bool* discreteInputs, size_t length){
+  void ReadDiscreteInputs(bool* discreteInputs, size_t length){
     cli();            // Disable interrupts to enter critical section
     for (size_t i = 0; i < length; i++) {
       discreteInputs[i] = false;
