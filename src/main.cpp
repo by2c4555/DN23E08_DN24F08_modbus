@@ -68,7 +68,7 @@ void ModbusUpdate(){
   gpio.ReadDiscreteInputs(discreteInputs,numDiscreteInputs);
   gpio.SetDisplay((int)holdingRegisters[2]);
   if(holdingRegisters[2] < 0 || holdingRegisters[2] > 9999) {
-    gpio.OffDisplay();
+    gpio.OffDisplay(); //off display
   }
   gpio.ReadInputRegisters(inputRegisters,8);
   eeprom.save();
