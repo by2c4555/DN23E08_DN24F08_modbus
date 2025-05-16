@@ -31,7 +31,7 @@ public:
     }
   }
 
-    // flush all changed values to EEPROM
+    // flush all changed values 
   void flush() {
     for (uint16_t i = 0; i < _size; i++) {
       if (_data[i] != _shadow[i]) {
