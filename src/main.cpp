@@ -1,4 +1,6 @@
 #include "DN23E08_IO.h"
+#include "miniEEPROM.h"
+
 #include <ModbusRTUSlave.h>
 #define MODBUS_SERIAL Serial
 #define MODBUS_BAUD 9600
@@ -45,6 +47,7 @@ bool coils[numCoils];
 bool discreteInputs[numDiscreteInputs];
 uint16_t holdingRegisters[numHoldingRegisters];
 uint16_t inputRegisters[numInputRegisters];
+miniEEPROM eeprom(holdingRegisters, 2, 0); // 0-Device-ID , 1-BaudRate
 
 void ModbusInit(){
   modbus.configureCoils(coils, numCoils);
@@ -59,6 +62,7 @@ void ModbusUpdate(){
   gpio.WirteCoils(coils,numCoils);
   gpio.ReadDiscreteInputs(discreteInputs,numDiscreteInputs);
   gpio.SetDisplay((int)holdingRegisters[0]);
+  gpio.ReadInputRegisters(inputRegisters,8);
 }
 
 void setup() {

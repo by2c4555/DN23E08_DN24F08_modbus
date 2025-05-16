@@ -31,6 +31,8 @@ private:
   
   volatile unsigned char dat[4] = {28,28,28,28};
   volatile unsigned char com_num;
+  volatile uint16_t adcResults[8]; // Stores results for ADC0-ADC7
+  volatile uint8_t adcCurrentChannel = 0;
 
   unsigned char Read165INP_byte_cur;
   unsigned char Read165INP_byte_buff;
@@ -81,9 +83,23 @@ private:
     digitalWrite(_latchPin, HIGH);
   }
 
+  void ReadAnalogInput(){
+        // Check if a conversion is complete (ADIF flag set)
+    if (ADCSRA & (1 << ADIF)) {
+      adcResults[adcCurrentChannel] = ADC; // Read result (clears ADIF)
+      
+      // Switch to next channel (0-7)
+      adcCurrentChannel = (adcCurrentChannel + 1) % 8;
+      ADMUX = (ADMUX & 0xF0) | adcCurrentChannel; // Update MUX
+      
+      ADCSRA |= (1 << ADSC); // Restart conversion (auto-triggered in free-running)
+    }
+  }
 
   void FlexiTimer2Callback(){
-    TubeDisplayOneBit();  // call every 3 ms
+    // call every 3 ms
+    TubeDisplayOneBit();  
+    ReadAnalogInput();
     if(FlexiTimer2_dealy_counter_1 > 200){
       FlexiTimer2_dealy_counter_1 = 0 ;
       Read165INP_fnc();  // call every 600 ms 
@@ -114,8 +130,22 @@ DN23E08_IO(int latch595Pin, int clock595Pin, int data595Pin, int OE595Pin,int lo
     pinMode(_data165Pin, INPUT);
     pinMode(_clk165Pin, OUTPUT);
     relay_port = 0;
+    ADC_init(); // Configure ADC Free-running mode
     FlexiTimer2::set(3,CallbackWrapper); // call every 3 ms
   }
+
+  void ADC_init(){
+      // Configure ADC
+  ADMUX = (1 << REFS0);          // AVcc reference, ADC0 initially
+  ADCSRA = (1 << ADEN) |         // Enable ADC
+           (1 << ADSC) |         // Start first conversion
+           (1 << ADATE) |        // Auto Trigger Enable (free-running)
+           (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Prescaler 128 (125 kHz)
+  ADCSRB = 0;                    // Free-running mode
+  DIDR0 = 0xFF;                  // Disable digital inputs on ADC0-ADC7 (optional)
+  }
+
+
 
   void begin(){
     FlexiTimer2::start();
@@ -189,8 +219,13 @@ DN23E08_IO(int latch595Pin, int clock595Pin, int data595Pin, int OE595Pin,int lo
     sei();  
   }
   
-  void inputRegistersUpdate(){
-
+  void ReadInputRegisters(uint16_t* InputRegisters, size_t length){
+    cli();            // Disable interrupts to enter critical section
+    for (size_t i = 0; i < length; i++) {
+      InputRegisters[i] = false;
+      InputRegisters[i] = adcResults[i];  // Example: increment each element
+  }
+    sei(); 
   }
   
 };
