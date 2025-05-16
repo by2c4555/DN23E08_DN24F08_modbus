@@ -82,6 +82,16 @@ private:
 
     digitalWrite(_latchPin, HIGH);
   }
+  void ADC_init(){
+      // Configure ADC
+  ADMUX = (1 << REFS0);          // AVcc reference, ADC0 initially
+  ADCSRA = (1 << ADEN) |         // Enable ADC
+           (1 << ADSC) |         // Start first conversion
+           (1 << ADATE) |        // Auto Trigger Enable (free-running)
+           (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Prescaler 128 (125 kHz)
+  ADCSRB = 0;                    // Free-running mode
+  DIDR0 = 0xFF;                  // Disable digital inputs on ADC0-ADC7 (optional)
+  }
 
   void ReadAnalogInput(){
         // Check if a conversion is complete (ADIF flag set)
@@ -132,17 +142,6 @@ DN23E08_IO(int latch595Pin, int clock595Pin, int data595Pin, int OE595Pin,int lo
     relay_port = 0;
     ADC_init(); // Configure ADC Free-running mode
     FlexiTimer2::set(3,CallbackWrapper); // call every 3 ms
-  }
-
-  void ADC_init(){
-      // Configure ADC
-  ADMUX = (1 << REFS0);          // AVcc reference, ADC0 initially
-  ADCSRA = (1 << ADEN) |         // Enable ADC
-           (1 << ADSC) |         // Start first conversion
-           (1 << ADATE) |        // Auto Trigger Enable (free-running)
-           (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Prescaler 128 (125 kHz)
-  ADCSRB = 0;                    // Free-running mode
-  DIDR0 = 0xFF;                  // Disable digital inputs on ADC0-ADC7 (optional)
   }
 
 
